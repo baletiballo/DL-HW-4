@@ -1,0 +1,43 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{notomath}
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{nicefrac}
+\usepackage{extarrows}
+\usepackage{csquotes}
+\usepackage{bussproofs}
+\usepackage[tableaux]{prooftrees}
+\usepackage{stmaryrd}
+\usepackage{tikz}
+\usetikzlibrary {graphs, arrows}
+\author{Silas Kuder}
+\renewcommand\thesection{Aufgabe \arabic{section}}
+\renewcommand\thesubsection{(\alph{subsection})}
+\begin{document}
+\begin{prooftree}
+	\AxiomC {\(\Gamma, \phi\land\psi\)}
+	\RightLabel{\((\land)\)}			\UnaryInfC{\(\Gamma,\phi,\psi\)}
+\end{prooftree}
+\begin{prooftree}
+	\AxiomC {\(\Gamma, \lnot\lnot\phi\)}
+	\RightLabel{\((\lnot\lnot)\)}			\UnaryInfC{\(\Gamma,\phi\)}
+\end{prooftree}
+\begin{prooftree}\rootAtTop
+	\AxiomC {\(\Gamma, \lnot\phi\)}
+	\AxiomC {\(\Gamma, \lnot\psi\)}
+	\RightLabel{\((\lnot\land)\)}			\BinaryInfC{\(\lnot(\phi\land\psi)\)}
+\end{prooftree}
+\begin{prooftree}
+	\AxiomC {\(\Gamma, \phi, \lnot\phi\)}
+	\RightLabel{\((Ax)\)}			\UnaryInfC{\(\bot\)}
+\end{prooftree}
+\begin{prooftree}
+	\AxiomC {\(\Gamma, \Box\phi_1, \ldots,\Box\phi_n,\lnot\Box\phi_0\)}
+	\RightLabel{\((\lnot\Box)\)}			\UnaryInfC{\(\phi_1,\ldots,\phi_n,\lnot\phi_0\)}
+\end{prooftree}
+	
+\end{document}
