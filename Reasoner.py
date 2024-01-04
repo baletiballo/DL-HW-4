@@ -1,30 +1,31 @@
 import logging
+import sys
 from Formula import *
 import Parser
 
 """
-Since formulae are objects all splitting and reducing of them is just handling of pointers into the original formula
-labels are sets of formulae and python has a built-in set, neat
+Since formulae are objects all splitting and reducing of them is just handling of pointers into the original formula.
+Labels are sets of formulae and python has a built-in set, neat
 """
 
-example_formula = Diamond(And(Diamond(Atom("p")), Diamond(Not(Atom("p"))))).normal_form()
-example_label_1 = {example_formula}  # Python built-in set
-example_label_2 = {Box(Implication(Atom("q").normal_form(),
-                                   Diamond(Atom("p")))).normal_form(),
-                   Diamond(Atom("q")).normal_form(),
-                   Box(Box(Not(Atom("p")))).normal_form()
-                   }
-str(example_formula)
 
-
-def show(label):
+# set.__str__() is not recursive, so we need a special function to display the actual Formulae, not just their pointers
+def show(label: set[Formula]) -> str:
     s = "{  "
     for formula in label:
         s = s + formula.__str__() + ", "
     return s[:-2] + "  }"
 
 
-def successful(label):
+# Replace all formulae in the label with their normal_form().
+# As sets are immutable, this cannot truly be done in Situ. So we just create a new one
+def normalized(label: set[Formula]) -> set:
+    return {formula.normal_form() for formula in label}
+
+
+# returns whether a label is successful, i.e. the set of formulae is satisfiable
+# only call with normalized labels, otherwise it will prematurely consider it saturated
+def successful(label: set[Formula]) -> bool:
     logging.info(f"Starting with: {show(label)}")
 
     # check for clashes
@@ -80,15 +81,17 @@ def successful(label):
     # we continue with or-branching, as we need to propositionally saturate the label
     or_branches = [formula for formula in label if formula.applicable_tableaux_rule == "NotAnd"]
     if or_branches:
-        # as a crude heuristic we branch on the smallest formula first, hoping it succeeds (or clashes) quickly
-        branch_formula = min(or_branches, key=lambda f: f.size)
+        # As a crude heuristic we branch on the smallest formula first, hoping it succeeds (or clashes) quickly
+        # We directly discard the top-level "Not", to avoid sub_formulae[].sub_formulae[]
+        branch_formula = min(or_branches, key=lambda f: f.size).sub_formulae[0]
         logging.info(f"Or-Branching on {branch_formula}")
         label.remove(branch_formula)
+        # perform the (¬∧) rule
         branch_1 = label.copy()
-        branch_1.add(Not(branch_formula.sub_formulae[0].sub_formulae[0]))
+        branch_1.add(Not(branch_formula.sub_formulae[0]))
         logging.debug(f"Branch 1: {show(branch_1)}")
         branch_2 = label.copy()
-        branch_2.add(Not(branch_formula.sub_formulae[0].sub_formulae[1]))
+        branch_2.add(Not(branch_formula.sub_formulae[1]))
         logging.debug(f"Branch 2: {show(branch_2)}")
         return successful(branch_1) or successful(branch_2)
     logging.info(f"{show(label)} is propositionally saturated, And-Branching now")
@@ -107,13 +110,23 @@ def successful(label):
     logging.debug(f"\"Unboxed\" Label: {show(label)}")
     # now check for all branches, whether they are successful.
     # To try and save space on the heap we use a lazy generator. K being PSpace complete, this will not always work
+    # I admit this is a pretty big expression, but it cannot be broken down without outsourcing it to a
+    # generator function, and that will not improve the readability by much
     branches = (successful(label.copy().union({Not(formula.sub_formulae[0].sub_formulae[0])})) for formula in
                 and_branches)
     return all(branches)
 
 
+example_formula = Diamond(And(Diamond(Atom("p")), Diamond(Not(Atom("p"))))).normal_form()
+example_label_1 = {example_formula}  # Python built-in set
+example_label_2 = normalized({Box(Implication(Atom("q"), Diamond(Atom("p")))),
+                              Diamond(Atom("q")), Box(Box(Not(Atom("p"))))})
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, filename="reasoner.log", encoding='utf-8')
+    in_label = Parser.parse_input(sys.argv[1])
+    print(successful(in_label))
     if successful(example_label_2):
         print("Success")
     else:
