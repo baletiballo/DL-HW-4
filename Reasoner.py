@@ -126,8 +126,5 @@ example_label_2 = normalized({Box(Implication(Atom("q"), Diamond(Atom("p")))),
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, filename="reasoner.log", encoding='utf-8')
     in_label = Parser.parse_input(sys.argv[1])
-    print(successful(in_label))
-    if successful(example_label_2):
-        print("Success")
-    else:
-        print("Fail")
+    logging.info(f"Input Label: {in_label}")
+    print(f"Input Label is satisfiable: {successful(normalized(in_label))}")
