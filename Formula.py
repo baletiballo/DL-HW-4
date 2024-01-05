@@ -3,10 +3,21 @@ Formula is essentially an abstract superclass for the recursive syntax-tree (htt
 sub-formulae are the sub-formulae (duh) one for Not and Box; two for And
 applicable_tableaux_rule gives easier access and will allow a match-case construct
 size is the number of logical connectives in the formula. A crude heuristic which branch to choose first
-normal_form takes care of Diamond, or, -> and alike. Please use it after parsing formulae.
+normal_form removes double negations, as well as Diamond, or, -> and alike. Please use it after parsing formulae.
 
-Formula implements __eq__ thus comparisons with == (or "in") are possible
+Formula implements:
+__eq__   so comparisons with == (or "in") are possible
+__str__  to print a canonical form (using unicode for the logical symbols)
+__hash__ to allow sets of formulae
+
+The available subclasses are:
+Atom, Not, And, Box, Or, Implication, BiImplication, Diamond
+They all take one or two Formulas as argument, depending on whether they are unary or binary.
+Except for Atom, which takes a string as its name
 """
+
+
+# The abstract superclass. Don't make an object of this type, use its subclasses
 class Formula:
     def __init__(self):
         self.sub_formulae = None
@@ -30,7 +41,7 @@ class Formula:
 
 
 class Atom(Formula):
-    def __init__(self, name):
+    def __init__(self, name:str):
         super().__init__()
         self.name = name
 
@@ -39,7 +50,7 @@ class Atom(Formula):
 
 
 class Not(Formula):
-    def __init__(self, neg):
+    def __init__(self, neg: Formula):
         super().__init__()
         self.sub_formulae = [neg]
         if isinstance(neg, Not):
@@ -63,7 +74,7 @@ class Not(Formula):
 
 
 class And(Formula):
-    def __init__(self, conj_1, conj_2):
+    def __init__(self, conj_1: Formula, conj_2: Formula):
         super().__init__()
         self.sub_formulae = [conj_1, conj_2]
         self.applicable_tableaux_rule = "And"
@@ -78,7 +89,7 @@ class And(Formula):
 
 
 class Box(Formula):
-    def __init__(self, boxed):
+    def __init__(self, boxed: Formula):
         super().__init__()
         self.sub_formulae = [boxed]
         self.applicable_tableaux_rule = None
@@ -92,7 +103,7 @@ class Box(Formula):
 
 
 class Or(Formula):
-    def __init__(self, disj_1, disj_2):
+    def __init__(self, disj_1: Formula, disj_2: Formula):
         super().__init__()
         self.sub_formulae = [disj_1, disj_2]
         self.applicable_tableaux_rule = None
@@ -105,7 +116,7 @@ class Or(Formula):
 
 
 class Implication(Formula):
-    def __init__(self, premise, conclusion):
+    def __init__(self, premise: Formula, conclusion: Formula):
         super().__init__()
         self.sub_formulae = [premise, conclusion]
         self.applicable_tableaux_rule = None
@@ -118,7 +129,7 @@ class Implication(Formula):
 
 
 class BiImplication(Formula):
-    def __init__(self, eq_1, eq_2):
+    def __init__(self, eq_1: Formula, eq_2: Formula):
         super().__init__()
         self.sub_formulae = [eq_1, eq_2]
         self.applicable_tableaux_rule = None
@@ -132,7 +143,7 @@ class BiImplication(Formula):
 
 
 class Diamond(Formula):
-    def __init__(self, diamonded):
+    def __init__(self, diamonded: Formula):
         super().__init__()
         self.sub_formulae = [diamonded]
         self.applicable_tableaux_rule = None
