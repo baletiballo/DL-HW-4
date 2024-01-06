@@ -124,7 +124,7 @@ example_label_2 = normalized({Box(Implication(Atom("q"), Diamond(Atom("p")))),
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG, filename="reasoner.log", encoding='utf-8')
+    logging.basicConfig(level=logging.INFO, filename="reasoner.log", encoding='utf-8')
     if sys.argv[1] == "-label":
         label = Parser.parse_label_str(sys.argv[2])
         if len(label) <= 100:

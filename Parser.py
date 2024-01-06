@@ -9,7 +9,7 @@ test_rpn = 'p ◇ p ¬ ◇ ∧ ◇'
 
 # http://www.diag.uniroma1.it/liberato/ar/modal/logic.html
 # all unary precedences are the same, then And > Or > -> > <->
-def precedence(operator: str) -> int:
+def __precedence(operator: str) -> int:
     match operator:
         case "\u00AC" | "~":  # Not
             return 100
@@ -33,8 +33,8 @@ def precedence(operator: str) -> int:
 # splitting tokens on spaces seems reasonable
 # this could directly generate a Formula, but readability would suffer, and an added linear component on parsing, will
 # not hurt PSpace-complete runtime
-def shunt(formula: str) -> str:
-    tokens = formula.strip().split(" ")
+def __shunt(formula: str) -> str:
+    tokens = formula.strip().split()
     rpn: list[str] = []
     stack: list[str] = []  # python lists can be used as a stack
 
@@ -43,21 +43,21 @@ def shunt(formula: str) -> str:
             case "\u00AC" | "~":  # Not
                 stack.append("\u00AC")  # highest precedence
             case "\u2227" | "/\\" | "n":  # And
-                while len(stack) != 0 and precedence(stack[-1]) >= 65:
+                while len(stack) != 0 and __precedence(stack[-1]) >= 65:
                     rpn.append(stack.pop())
                 stack.append("\u2227")
             case "\u2228" | "\\/" | "v":  # Or
-                while len(stack) != 0 and precedence(stack[-1]) >= 60:
+                while len(stack) != 0 and __precedence(stack[-1]) >= 60:
                     rpn.append(stack.pop())
                 stack.append("\u2228")
             case "\u25FB" | "[]":  # Box
                 stack.append("\u25FB")  # highest precedence
             case "\u2192" | "->":  # Implication
-                while len(stack) != 0 and precedence(stack[-1]) > 50:  # Implication is right-associative
+                while len(stack) != 0 and __precedence(stack[-1]) > 50:  # Implication is right-associative
                     rpn.append(stack.pop())
                 stack.append("\u2192")
             case "\u21D4" | "<->":  # BiImplication
-                while len(stack) != 0 and precedence(stack[-1]) >= 40:
+                while len(stack) != 0 and __precedence(stack[-1]) >= 40:
                     rpn.append(stack.pop())
                 stack.append("\u2228")
             case "\u25C7" | "<>":  # Diamond
@@ -83,8 +83,8 @@ def shunt(formula: str) -> str:
     return ' '.join(rpn)
 
 
-def parse_rpn_formula(rpn: str) -> Formula:
-    tokens = rpn.strip().split(" ")
+def __parse_rpn_formula(rpn: str) -> Formula:
+    tokens = rpn.strip().split()
     f_stack: list[Formula] = []
     for token in tokens:  # my proposed set of operator-tokens, first one is Unicode, the others are ASCII imitations
         new: Formula
@@ -117,9 +117,13 @@ def parse_rpn_formula(rpn: str) -> Formula:
     return f_stack.pop()
 
 
+def parse_formula_str(formula: str) -> Formula:
+    return __parse_rpn_formula(__shunt(formula))
+
+
 def parse_label_str(source: str) -> set[Formula]:
     formulae = source.split(",")
-    return {parse_rpn_formula(shunt(formula)) for formula in formulae}
+    return {parse_formula_str(formula) for formula in formulae}
 
 
 def parse_file(file_adr: str) -> list[set[Formula]]:

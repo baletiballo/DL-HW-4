@@ -1,3 +1,4 @@
+import Parser
 """
 Formula is essentially an abstract superclass for the recursive syntax-tree (https://en.wikipedia.org/wiki/Parse_tree)
 sub-formulae are the sub-formulae (duh) one for Not and Box; two for And
@@ -153,3 +154,36 @@ class Diamond(Formula):
 
     def __str__(self):
         return f"\u25C7 {self.sub_formulae[0]!s}"
+
+
+# return a formula of size 2n. Its tableau has n steps
+def formula_of_size_2(n: int) -> Formula:
+    f = "♢ " * n + "p"
+    return Parser.parse_formula_str(f).normal_form()
+
+
+# returns a formula with 2^(n+1)-1 symbols.
+def exp_size_formula(n: int) -> Formula:
+    if n == 0:
+        return Atom("p")
+    else:
+        return And(exp_size_formula(n - 1), exp_size_formula(n - 1))
+
+
+# returns the series of formulae, that don't have the polynomial model property
+def exp_model_formula(n: int) -> Formula:
+    return Parser.parse_formula_str(__em_formula_str(n))
+
+
+# It is a lot easier to write the formula in string-format, then let the parser deal with it
+def __em_formula_str(n: int) -> str:
+    if n == 0:
+        return "p0"
+    else:
+        n = n-1  # we return phi_{n+1}, reducing n now keeps the indices from the Ex. sheet
+        phi_n = __em_formula_str(n)
+        box_n = "□ " * n
+        big_and = ""
+        for j in range(1, n+1):
+            big_and = big_and + f" ∧ ( ( q{j} → □ q{j} ) ∧ ( ¬ q{j} → □ ¬ q{j} ) ) ) ) "
+        return f"{phi_n} ∧ { box_n } ( p{n} → ( ♢ ( p{n + 1} ∧ q{n + 1} ) ∧ ♢ ( p{n + 1} ∧ ¬ q{n + 1} ) {big_and}"
