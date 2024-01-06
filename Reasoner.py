@@ -85,7 +85,7 @@ def successful(label: set[Formula]) -> bool:
         # We directly discard the top-level "Not", to avoid sub_formulae[].sub_formulae[]
         branch_formula = min(or_branches, key=lambda f: f.size).sub_formulae[0]
         logging.info(f"Or-Branching on {branch_formula}")
-        label.remove(branch_formula)
+        label.remove(Not(branch_formula))
         # perform the (¬∧) rule
         branch_1 = label.copy()
         branch_1.add(Not(branch_formula.sub_formulae[0]))
@@ -125,6 +125,26 @@ example_label_2 = normalized({Box(Implication(Atom("q"), Diamond(Atom("p")))),
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, filename="reasoner.log", encoding='utf-8')
-    in_label = Parser.parse_input(sys.argv[1])
-    logging.info(f"Input Label: {in_label}")
-    print(f"Input Label is satisfiable: {successful(normalized(in_label))}")
+    if sys.argv[1] == "-label":
+        label = Parser.parse_label_str(sys.argv[2])
+        if len(label) <= 100:
+            answer = f"{show(label)} is "
+        else:
+            answer = f"Label is "
+        if successful(normalized(label)):
+            answer = answer + "satisfiable"
+        else:
+            answer = answer + "not satisfiable"
+        print(answer)
+    else:
+        labels = Parser.parse_file(sys.argv[1])
+        for n, label in enumerate(labels):
+            if len(label) <= 100:
+                answer = f"{show(label)} is "
+            else:
+                answer = f"Label {n} is "
+            if successful(normalized(label)):
+                answer = answer + "satisfiable"
+            else:
+                answer = answer + "not satisfiable"
+            print(answer)

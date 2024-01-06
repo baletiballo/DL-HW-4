@@ -3,7 +3,7 @@ Formula is essentially an abstract superclass for the recursive syntax-tree (htt
 sub-formulae are the sub-formulae (duh) one for Not and Box; two for And
 applicable_tableaux_rule gives easier access and will allow a match-case construct
 size is the number of logical connectives in the formula. A crude heuristic which branch to choose first
-normal_form removes double negations, as well as Diamond, or, -> and alike. Please use it after parsing formulae.
+normal_form removes double negations, as well as Diamond, or, -> and alike. Please use it before reasoning.
 
 Formula implements:
 __eq__   so comparisons with == (or "in") are possible
@@ -85,7 +85,7 @@ class And(Formula):
         return self
 
     def __str__(self):
-        return f"({self.sub_formulae[0]!s} \u2227 {self.sub_formulae[1]!s})"
+        return f"( {self.sub_formulae[0]!s} \u2227 {self.sub_formulae[1]!s} )"
 
 
 class Box(Formula):
@@ -125,7 +125,7 @@ class Implication(Formula):
         return Not(And(self.sub_formulae[0], Not(self.sub_formulae[1]))).normal_form()
 
     def __str__(self):
-        return f"{self.sub_formulae[0]!s} \u2192 {self.sub_formulae[1]!s}"
+        return f"( {self.sub_formulae[0]!s} \u2192 {self.sub_formulae[1]!s} )"
 
 
 class BiImplication(Formula):
