@@ -1,5 +1,4 @@
 import logging
-
 from Formula import *
 
 
@@ -17,13 +16,13 @@ def __precedence(operator: str) -> int:
             return 65
         case "\u2228" | "\\/" | "v":  # Or
             return 60
-        case "\u25FB" | "[]":  # Box
+        case "\u25FB" | "□" | "[]":  # Box
             return 100
         case "\u2192" | "->":  # Implication
             return 50
         case "\u21D4" | "<->":  # BiImplication
             return 40
-        case "\u25C7" | "<>":  # Diamond
+        case "\u25C7" | "♢" | "<>":  # Diamond
             return 100
         case "(":  # "(" doesn't really have a precedence, but this simplifies the shunting
             return 0
@@ -50,7 +49,7 @@ def __shunt(formula: str) -> str:
                 while len(stack) != 0 and __precedence(stack[-1]) >= 60:
                     rpn.append(stack.pop())
                 stack.append("\u2228")
-            case "\u25FB" | "[]":  # Box
+            case "\u25FB" | '□' | "[]":  # Box
                 stack.append("\u25FB")  # highest precedence
             case "\u2192" | "->":  # Implication
                 while len(stack) != 0 and __precedence(stack[-1]) > 50:  # Implication is right-associative
@@ -60,7 +59,7 @@ def __shunt(formula: str) -> str:
                 while len(stack) != 0 and __precedence(stack[-1]) >= 40:
                     rpn.append(stack.pop())
                 stack.append("\u2228")
-            case "\u25C7" | "<>":  # Diamond
+            case "\u25C7" | '♢' | "<>":  # Diamond
                 stack.append("\u25C7")  # highest precedence
             case "(":
                 stack.append("(")

@@ -26,12 +26,13 @@ def normalized(label: set[Formula]) -> set:
 # returns whether a label is successful, i.e. the set of formulae is satisfiable
 # only call with normalized labels, otherwise it will prematurely consider it saturated
 def successful(label: set[Formula]) -> bool:
+    logging.basicConfig(level=logging.INFO, filename="reasoner.log", encoding='utf-8')
     logging.info(f"Starting with: {show(label)}")
 
     # check for clashes
     negated_formulae = [formula.sub_formulae[0] for formula in label if isinstance(formula, Not)]
     for formula in negated_formulae:
-        if formula in label:
+        if formula in label or formula == Top():
             logging.info(f"Clash on {formula} detected")
             return False
 
@@ -50,18 +51,22 @@ def successful(label: set[Formula]) -> bool:
                     new_formula = formula.sub_formulae[0].sub_formulae[0]
                     label.remove(formula)
                     label.add(new_formula)
+                    # this may have added a new quick rule
                     if new_formula.applicable_tableaux_rule == "NotNot" or \
-                            new_formula.applicable_tableaux_rule == "And":  # this may have added a new rule
+                            new_formula.applicable_tableaux_rule == "And" and \
+                            new_formula not in quick_rules:  # Label is a set. Remove no formula twice
                         quick_rules.append(new_formula)
                 case "And":
                     label.remove(formula)
-                    label = label.union(formula.sub_formulae)  # adds both sub formulae
+                    label.update(formula.sub_formulae)   # adds both sub formulae
                     # this may have added new rules, add them
                     if formula.sub_formulae[0].applicable_tableaux_rule == "NotNot" or \
-                            formula.sub_formulae[0].applicable_tableaux_rule == "And":  # this may have added a new rule
+                            formula.sub_formulae[0].applicable_tableaux_rule == "And" and \
+                            formula.sub_formulae[0] not in quick_rules:  # Label is a set. Remove no formula twice
                         quick_rules.append(formula.sub_formulae[0])
                     if formula.sub_formulae[1].applicable_tableaux_rule == "NotNot" or \
-                            formula.sub_formulae[1].applicable_tableaux_rule == "And":  # this may have added a new rule
+                            formula.sub_formulae[1].applicable_tableaux_rule == "And" and \
+                            formula.sub_formulae[0] not in quick_rules:  # Label is a set. Remove no formula twice
                         quick_rules.append(formula.sub_formulae[1])
     logging.debug(f"After all quick rules: {show(label)}")
 
@@ -84,7 +89,7 @@ def successful(label: set[Formula]) -> bool:
         # As a crude heuristic we branch on the smallest formula first, hoping it succeeds (or clashes) quickly
         # We directly discard the top-level "Not", to avoid sub_formulae[].sub_formulae[]
         branch_formula = min(or_branches, key=lambda f: f.size).sub_formulae[0]
-        logging.info(f"Or-Branching on {branch_formula}")
+        logging.info(f"Or-Branching on {Not(branch_formula)}")
         label.remove(Not(branch_formula))
         # perform the (¬∧) rule
         branch_1 = label.copy()
@@ -124,7 +129,7 @@ example_label_2 = normalized({Box(Implication(Atom("q"), Diamond(Atom("p")))),
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO, filename="reasoner.log", encoding='utf-8')
+    logging.basicConfig(level=logging.WARNING, filename="reasoner.log", encoding='utf-8')
     if sys.argv[1] == "-label":
         label = Parser.parse_label_str(sys.argv[2])
         if len(label) <= 100:

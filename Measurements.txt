@@ -1,0 +1,30 @@
+1.000 ms to satisfy ϕ_0
+0.999 ms to satisfy ϕ_1
+0.999 ms to satisfy ϕ_2
+5.037 ms to satisfy ϕ_3
+8.043 ms to satisfy ϕ_4
+18.540 ms to satisfy ϕ_5
+41.027 ms to satisfy ϕ_6
+73.640 ms to satisfy ϕ_7
+154.554 ms to satisfy ϕ_8
+318.383 ms to satisfy ϕ_9
+636.519 ms to satisfy ϕ_10
+1408.406 ms to satisfy ϕ_11
+4361.348 ms to satisfy ϕ_12
+9566.417 ms to satisfy ϕ_13
+11400.049 ms to satisfy ϕ_14
+0.000 ms to satisfy a (trivial) formula of size 2^1
+0.000 ms to satisfy a (trivial) formula of size 2^2
+0.000 ms to satisfy a (trivial) formula of size 2^3
+0.000 ms to satisfy a (trivial) formula of size 2^4
+1.022 ms to satisfy a (trivial) formula of size 2^5
+0.000 ms to satisfy a (trivial) formula of size 2^6
+0.000 ms to satisfy a (trivial) formula of size 2^7
+0.000 ms to satisfy a (trivial) formula of size 2^8
+0.000 ms to satisfy a (trivial) formula of size 2^9
+1.039 ms to satisfy a (trivial) formula of size 2^10
+0.965 ms to satisfy a (trivial) formula of size 2^11
+2.004 ms to satisfy a (trivial) formula of size 2^12
+5.033 ms to satisfy a (trivial) formula of size 2^13
+10.173 ms to satisfy a (trivial) formula of size 2^14
+21.703 ms to satisfy a (trivial) formula of size 2^15
