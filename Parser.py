@@ -121,6 +121,8 @@ def parse_formula_str(formula: str) -> Formula:
 
 
 def parse_label_str(source: str) -> set[Formula]:
+    if source.startswith("{"):  # if there are set-brackets around the label, remove them
+        source = source[1:-1]
     formulae = source.split(",")
     return {parse_formula_str(formula) for formula in formulae}
 
